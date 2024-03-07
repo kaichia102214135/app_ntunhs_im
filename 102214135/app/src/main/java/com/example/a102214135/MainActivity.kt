@@ -2,6 +2,8 @@ package com.example.a102214135
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -11,10 +13,14 @@ import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
+    val TAG:String = MainActivity::class.java.simpleName
+    private lateinit var handler: Handler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        handler = Handler(Looper.getMainLooper())
+
         val textView = findViewById<TextView>(R.id.textView)
         val guess_button = findViewById<Button>(R.id.guess_botton)
         val reset_button = findViewById<Button>(R.id.reset_botton)
@@ -28,17 +34,30 @@ class MainActivity : AppCompatActivity() {
             if (guess != null) {
                 if (guess == secret) {
                     textView.text = "猜對了！"
-                } else if (guess > secret) {
-                    maxNum = guess - 1
+                    handler.postDelayed({
+                        Toast.makeText(this,"6秒之後執行重置",Toast.LENGTH_SHORT).show()
+                    },6000 )
+                }
+                else if (guess > secret) {
+                    maxNum = guess
                     textView.text = "介於：$minNum ~ $maxNum 之間"
 
                 } else if (guess < secret) {
-                    minNum = guess + 1
+                    minNum = guess
                     textView.text = "介於：$minNum ~ $maxNum 之間"
                 }
             } else {
                 textView.text = "請輸入一個數字"
             }
         }
+        reset_button.setOnClickListener {
+            secret= Random().nextInt(100) + 1
+            textView.text="讓我們在猜一次"
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacksAndMessages(null)
     }
 }
